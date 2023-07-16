@@ -1,7 +1,8 @@
 package me.gallowsdove.foxymachines.listeners;
 
+import io.github.mooy1.infinitylib.common.Scheduler;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
-import me.gallowsdove.foxymachines.FoxyMachines;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.blocks.BlockPosition;
 import me.gallowsdove.foxymachines.implementation.machines.ForcefieldDome;
 import me.gallowsdove.foxymachines.utils.SimpleLocation;
 import org.bukkit.Bukkit;
@@ -24,47 +25,27 @@ import java.util.UUID;
 public class ForcefieldListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onPlayerBreak(@Nonnull BlockBreakEvent e) {
-        Block b = e.getBlock();
-
-        if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-            Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-        }
+        handleBlockChange(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onExplosionBreak(@Nonnull BlockExplodeEvent e) {
-        Block b = e.getBlock();
-
-        if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-            Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-        }
+        handleBlockChange(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onBurnBreak(@Nonnull BlockBurnEvent e) {
-        Block b = e.getBlock();
-
-        if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-            Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-        }
+        handleBlockChange(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onLeavesDecay(@Nonnull LeavesDecayEvent e) {
-        Block b = e.getBlock();
-
-        if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-            Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-        }
+        handleBlockChange(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onFadeBreak(@Nonnull BlockFadeEvent e) {
-        Block b = e.getBlock();
-
-        if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-            Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-        }
+        handleBlockChange(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -73,37 +54,46 @@ public class ForcefieldListener implements Listener {
             return;
         }
 
-        Block b = e.getBlock();
-
-        if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-            Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-        }
+        handleBlockChange(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onBlocksBreakByExplosiveToolEvent(@Nonnull ExplosiveToolBreakBlocksEvent e) {
-        for (Block b : e.getAdditionalBlocks()) {
-            if (ForcefieldDome.FORCEFIELD_BLOCKS.remove(b)) {
-                Bukkit.getScheduler().runTask(FoxyMachines.getInstance(), () -> b.setType(Material.BARRIER));
-            }
+        e.getAdditionalBlocks().forEach(this::handleBlockChange);
+    }
+
+    private void handleBlockChange(Block b) {
+        if (ForcefieldDome.getForcefieldBlocks().remove(new BlockPosition(b))) {
+            Scheduler.run(() -> b.setType(Material.BARRIER));
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     private void onPlayerTeleport(@Nonnull PlayerTeleportEvent e) {
-        if (e.getCause() == TeleportCause.ENDER_PEARL || e.getCause() == TeleportCause.CHORUS_FRUIT) {
-            Location l = e.getTo();
-            for (SimpleLocation loc: ForcefieldDome.domeLocations) {
-                if (e.getPlayer().getWorld() == Bukkit.getServer().getWorld(UUID.fromString(loc.getWorldUUID()))) {
-                    int xdif = (int) (l.getX() - loc.getX());
-                    int ydif = (int) (l.getY() - loc.getY());
-                    int zdif = (int) (l.getZ() - loc.getZ());
-                    if (Math.floor(Math.sqrt((xdif * xdif) + (ydif * ydif) + (zdif * zdif))) <= 32) {
-                        e.setCancelled(true);
-                        e.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE + "You can't teleport to a dome!");
-                        break;
-                    }
-                }
+        // Only care about vanilla teleports
+        if (e.getCause() != TeleportCause.ENDER_PEARL && e.getCause() != TeleportCause.CHORUS_FRUIT) {
+            return;
+        }
+
+        Location l = e.getTo();
+
+        // If for some reason the location is null
+        if (l == null) {
+            return;
+        }
+
+        for (SimpleLocation loc : ForcefieldDome.getDomeLocations()) {
+            if (e.getPlayer().getWorld() != Bukkit.getServer().getWorld(UUID.fromString(loc.getWorldUUID()))) {
+                continue;
+            }
+
+            int xDif = (int) (l.getX() - loc.getX());
+            int yDif = (int) (l.getY() - loc.getY());
+            int zDif = (int) (l.getZ() - loc.getZ());
+            if (Math.floor(Math.sqrt((xDif * xDif) + (yDif * yDif) + (zDif * zDif))) <= 32) {
+                e.setCancelled(true);
+                e.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE + "You can't teleport to a dome!");
+                break;
             }
         }
     }
