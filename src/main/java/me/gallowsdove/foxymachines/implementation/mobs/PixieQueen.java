@@ -27,10 +27,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public class PixieQueen extends CustomBoss {
 
     public static class AttackPattern {
-        public static short CHARGE = 0;
-        public static short SHOOT = 1;
-        public static short SUMMON = 2;
-        public static short IDLE = 3;
+        public static final short CHARGE = 0;
+        public static final short SHOOT = 1;
+        public static final short SUMMON = 2;
+        public static final short IDLE = 3;
     }
 
     private static final NamespacedKey PATTERN_KEY = new NamespacedKey(FoxyMachines.getInstance(), "pattern");
@@ -99,8 +99,8 @@ public class PixieQueen extends CustomBoss {
             Collection<Entity> entities = pixieQueen.getWorld().getNearbyEntities(pixieQueen.getLocation(), 1.6, 1.6, 1.6);
 
             if (tick % 10 == 0) {
-                for (Entity player : entities) {
-                    if (player instanceof Player && ((Player) player).getGameMode() == GameMode.SURVIVAL) {
+                for (Entity nearbyEntity : entities) {
+                    if (nearbyEntity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL) {
                         pixieQueen.attack(player);
                     }
                 }
@@ -108,35 +108,31 @@ public class PixieQueen extends CustomBoss {
 
             entities = pixieQueen.getWorld().getNearbyEntities(pixieQueen.getLocation(), 10, 10, 10);
 
-            for (Entity player : entities) {
-                if (player instanceof Player && ((Player) player).getGameMode() == GameMode.SURVIVAL) {
-                    pixieQueen.setTarget((LivingEntity) player);
+            for (Entity nearbyEntity : entities) {
+                if (nearbyEntity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL) {
+                    pixieQueen.setTarget(player);
                     pixieQueen.setCharging(false);
                     if ((tick + 2) % 3 == 0) {
                         // TODO find out why this sometimes produces error
                         try {
                             pixieQueen.setVelocity(player.getLocation().toVector().subtract(entity.getLocation().toVector()).normalize().multiply(0.32));
-                        } catch (IllegalArgumentException e) { }
+                        } catch (IllegalArgumentException ignored) { }
                     }
                 }
             }
         } else if (pattern == AttackPattern.SHOOT) {
             pixieQueen.setCharging(false);
-            if (pixieQueen.getTarget() != null) {
-                if (tick % 5 == 0) {
-                    Arrow arrow = entity.launchProjectile(Arrow.class);
-                    arrow.setDamage(24);
-                    arrow.setColor(Color.LIME);
-                    arrow.setGlowing(true);
-                    arrow.setSilent(true);
-                    arrow.setGravity(false);
-                    arrow.setVelocity(pixieQueen.getTarget().getLocation().toVector().subtract(pixieQueen.getLocation().toVector()).normalize().multiply(1.42));
-                }
+            if (pixieQueen.getTarget() != null && tick % 5 == 0) {
+                Arrow arrow = entity.launchProjectile(Arrow.class);
+                arrow.setDamage(24);
+                arrow.setColor(Color.LIME);
+                arrow.setGlowing(true);
+                arrow.setSilent(true);
+                arrow.setGravity(false);
+                arrow.setVelocity(pixieQueen.getTarget().getLocation().toVector().subtract(pixieQueen.getLocation().toVector()).normalize().multiply(1.42));
             }
-        } else if (pattern == AttackPattern.SUMMON) {
-            if (tick == 25) {
-                summonPixieSwarm(pixieQueen.getLocation());
-            }
+        } else if (pattern == AttackPattern.SUMMON && tick == 25) {
+            summonPixieSwarm(pixieQueen.getLocation());
         }
     }
 

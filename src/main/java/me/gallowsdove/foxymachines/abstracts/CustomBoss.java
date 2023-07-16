@@ -31,7 +31,7 @@ public abstract class CustomBoss extends CustomMob {
 
     private final Set<DamageCause> resistances;
 
-    public CustomBoss(@Nonnull String id, @Nonnull String name, @Nonnull EntityType type, int health, @Nonnull DamageCause... resistances) {
+    protected CustomBoss(@Nonnull String id, @Nonnull String name, @Nonnull EntityType type, int health, @Nonnull DamageCause... resistances) {
         super(id, name, type, health);
         this.resistances = Set.of(resistances);
     }

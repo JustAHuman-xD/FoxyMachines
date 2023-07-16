@@ -54,7 +54,7 @@ public abstract class CustomMob {
     private final EntityType type;
     private final int health;
 
-    public CustomMob(@Nonnull String id, @Nonnull String name, @Nonnull EntityType type, int health) {
+    protected CustomMob(@Nonnull String id, @Nonnull String name, @Nonnull EntityType type, int health) {
         Validate.notNull(this.id = id);
         Validate.notNull(this.name = ChatColors.color(name));
         Validate.notNull(this.type = type);

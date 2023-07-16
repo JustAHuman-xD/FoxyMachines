@@ -29,8 +29,8 @@ public class Pixie extends CustomMob {
 
     @Override
     protected void onAttack(@Nonnull EntityDamageByEntityEvent e) {
-        if (!e.isCancelled()) {
-            Utils.dealDamageBypassingArmor((LivingEntity) e.getEntity(), (e.getDamage() - e.getFinalDamage()) * 0.2);
+        if (!e.isCancelled() && e.getEntity() instanceof LivingEntity livingEntity) {
+            Utils.dealDamageBypassingArmor(livingEntity, (e.getDamage() - e.getFinalDamage()) * 0.2);
         }
     }
 

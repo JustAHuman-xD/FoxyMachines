@@ -31,9 +31,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class HeadlessHorseman extends CustomBoss {
 
     public static class AttackPattern {
-        public static short LIGHTNING = 0;
-        public static short SHOOT = 1;
-        public static short SUMMON = 2;
+        public static final short LIGHTNING = 0;
+        public static final short SHOOT = 1;
+        public static final short SUMMON = 2;
     }
 
     private static final NamespacedKey PATTERN_KEY = new NamespacedKey(FoxyMachines.getInstance(), "pattern");

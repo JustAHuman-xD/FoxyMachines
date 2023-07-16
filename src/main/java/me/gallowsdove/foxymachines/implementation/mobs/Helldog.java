@@ -40,19 +40,18 @@ public class Helldog extends CustomMob {
         entity.setFireTicks(999999999);
         Collection<Entity> entities = helldog.getWorld().getNearbyEntities(helldog.getLocation(), 1.54, 1.54, 1.54);
 
-        for (Entity player : entities) {
-            if (player instanceof Player && ((Player) player).getGameMode() == GameMode.SURVIVAL) {
-                if (tick % 10 == 0)
-                    helldog.attack(player);
+        for (Entity nearbyEntity : entities) {
+            if (nearbyEntity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL && tick % 10 == 0) {
+                helldog.attack(player);
             }
         }
 
         if (tick % 20 == 0) {
             entities = helldog.getWorld().getNearbyEntities(helldog.getLocation(), 16, 16, 16);
 
-            for (Entity player : entities) {
-                if (player instanceof Player && ((Player) player).getGameMode() == GameMode.SURVIVAL) {
-                    helldog.setTarget((LivingEntity) player);
+            for (Entity nearbyEntity : entities) {
+                if (nearbyEntity instanceof Player player && player.getGameMode() == GameMode.SURVIVAL) {
+                    helldog.setTarget(player);
                 }
             }
         }
